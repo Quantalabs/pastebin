@@ -4,6 +4,7 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const port = process.argv[2] || 9000;
+const host = process.argv[3] || "localhost";
 
 http
   .createServer(function (req, res) {
@@ -86,6 +87,6 @@ http
       return res.end();
     }
   })
-  .listen(parseInt(port));
+  .listen(parseInt(port), host);
 
 console.log(`Server listening on port ${port}`);

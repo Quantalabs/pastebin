@@ -22,5 +22,8 @@
   "homepage": "https://github.com/Quantalabs/pastebin#readme",
   "dependencies": {
     "formidable": "^2.0.1"
+  },
+  "devDependencies": {
+    "pkg": "^5.5.2"
   }
 }
