@@ -1,0 +1,26 @@
+{
+  "name": "pastebin",
+  "version": "1.0.0",
+  "description": "Copy images, text, and anything else you want to another device seamlessly and easily",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quantalabs/pastebin.git"
+  },
+  "keywords": [
+    "copy",
+    "paste"
+  ],
+  "author": "Quantalabs (@Qlabs)",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Quantalabs/pastebin/issues"
+  },
+  "homepage": "https://github.com/Quantalabs/pastebin#readme",
+  "dependencies": {
+    "formidable": "^2.0.1"
+  }
+}
