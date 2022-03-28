@@ -9,6 +9,12 @@ var ip = require('ip');
 const port = process.argv[2] || 8080;
 const host = process.argv[3] || ip.address();
 
+
+// If uploads/ dir doesn't exist, create it
+if (!fs.existsSync("./uploads")) {
+  fs.mkdirSync("./uploads");
+}
+
 http
   .createServer(function (req, res) {
     console.log(`${req.method} ${req.url}`);
@@ -24,12 +30,18 @@ http
 
           // Generate QR code
           qr.toFile("./qrcode.png", "http://" + host + ":" + port + "/uploads/" + files.filetoupload.originalFilename)
+          
+          let html = `<img src='qrcode.png'/><br><p>File uploaded and moved!</p><a href='/'>Back to home</a>`;
+          
+          // Read upload.html
+          fs.readFile("./templates/upload.html", 'utf8', function (err, data) {
+            if (err) throw err;
+            let content = data
+              .replace("%CONTENT%", html)
 
-          res.writeHead(200, { "Content-Type": "text/html" });
-          res.write("<img src='qrcode.png'/>");
-          res.write("File uploaded and moved!");
-          res.write("<a href='/'>Back to home</a>");
-          res.end();
+            res.write(content);
+            res.end();
+          });
         });
       });
     }
