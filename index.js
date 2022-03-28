@@ -4,9 +4,10 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const qr = require("qrcode");
+var ip = require('ip');
 
-const port = process.argv[2] || 9000;
-const host = process.argv[3] || "localhost";
+const port = process.argv[2] || 8080;
+const host = process.argv[3] || ip.address();
 
 http
   .createServer(function (req, res) {

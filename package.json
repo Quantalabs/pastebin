@@ -22,6 +22,7 @@
   "homepage": "https://github.com/Quantalabs/pastebin#readme",
   "dependencies": {
     "formidable": "^2.0.1",
+    "ip": "^1.1.5",
     "qrcode": "^1.5.0"
   },
   "devDependencies": {
