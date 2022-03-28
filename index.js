@@ -27,6 +27,7 @@ http
           res.writeHead(200, { "Content-Type": "text/html" });
           res.write("<img src='qrcode.png'/>");
           res.write("File uploaded and moved!");
+          res.write("<a href='/'>Back to home</a>");
           res.end();
         });
       });
@@ -92,9 +93,10 @@ http
       res.write('<input type="file" name="filetoupload"><br>');
       res.write('<input type="submit">');
       res.write("</form>");
+      res.write("Download files: <a href='/download'>Download</a>");
       return res.end();
     }
   })
   .listen(parseInt(port), host);
 
-console.log(`Server listening on port ${port}`);
+console.log(`Server listening on port http://${host}:${port}`);
