@@ -42,6 +42,8 @@ http
         });
         res.end();
       });
+      
+      res.write("<a href='/'>Back to home</a>");
     } else if (req.url !== "/") {
       // parse URL
       const parsedUrl = url.parse(req.url);
