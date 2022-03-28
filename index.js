@@ -36,15 +36,25 @@ http
     // If request url is '/download'
     else if (req.url == "/download") {
       // Display links to download files
+      
+      let html = `<ul>`
       fs.readdir("./uploads", function (err, files) {
         if (err) throw err;
         files.forEach(function (file) {
-          res.write(`<a href="/uploads/${file}" download>${file}</a><br>`);
+          html += `<li><a href="/uploads/${file}" download>${file}</a><br></li>`
         });
-        res.end();
       });
+      html += `</ul>`
       
-      res.write("<a href='/'>Back to home</a>");
+      // Read home.html file
+      fs.readFile("./templates/download.html", "utf8", function (err, data) {
+        if (err) throw err;
+        let content = data
+        
+        content = content.replace("%CONTENT%", html)
+        res.write(content)
+        res.end()
+      });
     } else if (req.url !== "/") {
       // parse URL
       const parsedUrl = url.parse(req.url);
@@ -90,14 +100,21 @@ http
       });
     } else {
       res.writeHead(200, { "Content-Type": "text/html" });
-      res.write(
-        '<form action="fileupload" method="post" enctype="multipart/form-data">'
-      );
-      res.write('<input type="file" name="filetoupload"><br>');
-      res.write('<input type="submit">');
-      res.write("</form>");
-      res.write("Download files: <a href='/download'>Download</a>");
-      return res.end();
+
+      // Read template.html file synchronously
+      fs.readFile("./templates/home.html", "utf8", function (err, data) {
+        if (err) throw err;
+        let content = data
+          .replace("%CONTENT%", `
+          <form class="paste" action="fileupload" method="post" enctype="multipart/form-data">
+          <div class='input'><input type="file" name="filetoupload"><div>
+          <br>
+          <input type="submit">
+          </form>
+          `)
+        res.write(content);
+        res.end();
+      });
     }
   })
   .listen(parseInt(port), host);
