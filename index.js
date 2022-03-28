@@ -3,6 +3,8 @@ var formidable = require("formidable");
 const url = require("url");
 const fs = require("fs");
 const path = require("path");
+const qr = require("qrcode");
+
 const port = process.argv[2] || 9000;
 const host = process.argv[3] || "localhost";
 
@@ -18,6 +20,12 @@ http
         var newpath = "./uploads/" + files.filetoupload.originalFilename;
         fs.rename(oldpath, newpath, function (err) {
           if (err) throw err;
+
+          // Generate QR code
+          qr.toFile("./qrcode.png", "http://" + host + ":" + port + "/uploads/" + files.filetoupload.originalFilename)
+
+          res.writeHead(200, { "Content-Type": "text/html" });
+          res.write("<img src='qrcode.png'/>");
           res.write("File uploaded and moved!");
           res.end();
         });

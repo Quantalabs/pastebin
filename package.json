@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/Quantalabs/pastebin#readme",
   "dependencies": {
-    "formidable": "^2.0.1"
+    "formidable": "^2.0.1",
+    "qrcode": "^1.5.0"
   },
   "devDependencies": {
     "pkg": "^5.5.2"
