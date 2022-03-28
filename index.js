@@ -15,7 +15,7 @@ http
       var form = new formidable.IncomingForm();
       form.parse(req, function (err, fields, files) {
         var oldpath = files.filetoupload.filepath;
-        var newpath = "uploads" + files.filetoupload.originalFilename;
+        var newpath = "./uploads/" + files.filetoupload.originalFilename;
         fs.rename(oldpath, newpath, function (err) {
           if (err) throw err;
           res.write("File uploaded and moved!");
