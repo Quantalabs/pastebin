@@ -30,14 +30,14 @@ http
           fs.writeFileSync(
             `./uploads/textareas/textarea.txt`,
             fields.texttoupload,
-            { flag: 'w+' }
+            { flag: "w+" }
           );
 
           // Redirect to the downloads page
           res.writeHead(302, {
             Location: `http://${host}:${port}/download`,
           });
-          res.end()
+          res.end();
         } else {
           var oldpath = files.filetoupload.filepath;
           var newpath = "./uploads/" + files.filetoupload.originalFilename;
