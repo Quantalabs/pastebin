@@ -4,11 +4,11 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const qr = require("qrcode");
-var ip = require('ip');
+var ip = require("ip");
+const open = require('open');
 
 const port = process.argv[2] || 8080;
 const host = process.argv[3] || ip.address();
-
 
 // If uploads/ dir doesn't exist, create it
 if (!fs.existsSync("./uploads")) {
@@ -29,15 +29,22 @@ http
           if (err) throw err;
 
           // Generate QR code
-          qr.toFile("./qrcode.png", "http://" + host + ":" + port + "/uploads/" + files.filetoupload.originalFilename)
-          
+          qr.toFile(
+            "./qrcode.png",
+            "http://" +
+              host +
+              ":" +
+              port +
+              "/uploads/" +
+              files.filetoupload.originalFilename
+          );
+
           let html = `<img src='qrcode.png'/><br><p>File uploaded and moved!</p><a href='/'>Back to home</a>`;
-          
+
           // Read upload.html
-          fs.readFile("./templates/upload.html", 'utf8', function (err, data) {
+          fs.readFile("./templates/upload.html", "utf8", function (err, data) {
             if (err) throw err;
-            let content = data
-              .replace("%CONTENT%", html)
+            let content = data.replace("%CONTENT%", html);
 
             res.write(content);
             res.end();
@@ -48,24 +55,24 @@ http
     // If request url is '/download'
     else if (req.url == "/download") {
       // Display links to download files
-      
-      let html = `<ul>`
+
+      let html = `<ul>`;
       fs.readdir("./uploads", function (err, files) {
         if (err) throw err;
         files.forEach(function (file) {
-          html += `<li><a href="/uploads/${file}" download>${file}</a><br></li>`
+          html += `<li><a href="/uploads/${file}" download>${file}</a><br></li>`;
         });
       });
-      html += `</ul>`
-      
+      html += `</ul>`;
+
       // Read home.html file
       fs.readFile("./templates/download.html", "utf8", function (err, data) {
         if (err) throw err;
-        let content = data
-        
-        content = content.replace("%CONTENT%", html)
-        res.write(content)
-        res.end()
+        let content = data;
+
+        content = content.replace("%CONTENT%", html);
+        res.write(content);
+        res.end();
       });
     } else if (req.url !== "/") {
       // parse URL
@@ -116,14 +123,16 @@ http
       // Read template.html file synchronously
       fs.readFile("./templates/home.html", "utf8", function (err, data) {
         if (err) throw err;
-        let content = data
-          .replace("%CONTENT%", `
+        let content = data.replace(
+          "%CONTENT%",
+          `
           <form class="paste" action="fileupload" method="post" enctype="multipart/form-data">
           <div class='input'><input type="file" name="filetoupload"><div>
           <br>
           <input type="submit">
           </form>
-          `)
+          `
+        );
         res.write(content);
         res.end();
       });
@@ -132,3 +141,6 @@ http
   .listen(parseInt(port), host);
 
 console.log(`Server listening on port http://${host}:${port}`);
+
+// Open link
+open(`http://${host}:${port}`);
