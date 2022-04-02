@@ -16,7 +16,8 @@ node . # Starts pastebin
 ```
 
 If updating to a new release, simply download the executable file for your operating system and replace the old executable with the new one. This will work with minor releases only, do not do this with a major release.
-    
+
+Alternatively, if you are on linux, you can download the [install script](https://github.com/Quantalabs/pastebin/blob/master/scripts/install.sh), run it, and then extract the zip file downloaded, and add the directory to path.
 ## Usage
 
 To create a server, run the following:
