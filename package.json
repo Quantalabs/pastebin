@@ -1,31 +1,38 @@
 {
   "name": "pastebin",
-  "version": "1.0.0",
-  "description": "Copy images, text, and anything else you want to another device seamlessly and easily",
+  "version": "1.0.0b",
+  "description": "Copy images, text, and entire directories to another device seamlessly and easily",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Quantalabs/pastebin.git"
+    "url": "git+https://github.com/quantum9innovation/pastebin.git"
   },
   "keywords": [
     "copy",
-    "paste"
+    "paste",
+    "pastebin",
+    "file-transfer",
+    "sync"
   ],
-  "author": "Quantalabs (@Qlabs)",
+  "author": "quantum9innovation (q9i)",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/Quantalabs/pastebin/issues"
+    "url": "https://github.com/quantum9innovation/pastebin/issues"
   },
-  "homepage": "https://github.com/Quantalabs/pastebin#readme",
+  "homepage": "https://github.com/quantum9innovation/pastebin#readme",
   "dependencies": {
     "formidable": "^2.0.1",
     "ip": "^1.1.5",
+    "mime-types": "^2.1.35",
+    "mv": "^2.1.1",
+    "open": "^8.4.0",
     "qrcode": "^1.5.0"
   },
   "devDependencies": {
+    "eslint": "^8.12.0",
     "pkg": "^5.5.2"
   }
 }
