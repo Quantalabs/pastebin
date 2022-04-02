@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const qr = require("qrcode");
 var ip = require("ip");
-const open = require('open');
+const open = require("open");
 
 const port = process.argv[2] || 8080;
 const host = process.argv[3] || ip.address();
@@ -13,6 +13,7 @@ const host = process.argv[3] || ip.address();
 // If uploads/ dir doesn't exist, create it
 if (!fs.existsSync("./uploads")) {
   fs.mkdirSync("./uploads");
+  fs.mkdirSync("./uploads/textareas");
 }
 
 http
@@ -23,33 +24,52 @@ http
     if (req.url == "/fileupload") {
       var form = new formidable.IncomingForm();
       form.parse(req, function (err, fields, files) {
-        var oldpath = files.filetoupload.filepath;
-        var newpath = "./uploads/" + files.filetoupload.originalFilename;
-        fs.rename(oldpath, newpath, function (err) {
-          if (err) throw err;
-
-          // Generate QR code
-          qr.toFile(
-            "./qrcode.png",
-            "http://" +
-              host +
-              ":" +
-              port +
-              "/uploads/" +
-              files.filetoupload.originalFilename
+        // If textarea is not empty
+        if (fields.texttoupload != "") {
+          // Create a file with the textarea content
+          fs.writeFileSync(
+            `./uploads/textareas/textarea.txt`,
+            fields.texttoupload,
+            { flag: 'w+' }
           );
 
-          let html = `<img src='qrcode.png'/><br><p>File uploaded and moved!</p><a href='/'>Back to home</a>`;
-
-          // Read upload.html
-          fs.readFile("./templates/upload.html", "utf8", function (err, data) {
-            if (err) throw err;
-            let content = data.replace("%CONTENT%", html);
-
-            res.write(content);
-            res.end();
+          // Redirect to the downloads page
+          res.writeHead(302, {
+            Location: `http://${host}:${port}/download`,
           });
-        });
+          res.end()
+        } else {
+          var oldpath = files.filetoupload.filepath;
+          var newpath = "./uploads/" + files.filetoupload.originalFilename;
+          fs.rename(oldpath, newpath, function (err) {
+            if (err) throw err;
+
+            // Generate QR code
+            qr.toFile(
+              "./qrcode.png",
+              "http://" +
+                host +
+                ":" +
+                port +
+                "/uploads/" +
+                files.filetoupload.originalFilename
+            );
+
+            let html = `<img src='qrcode.png'/><br><p>File uploaded and moved!</p><a href='/'>Back to home</a>`;
+            // Read upload.html
+            fs.readFile(
+              "./templates/upload.html",
+              "utf8",
+              function (err, data) {
+                if (err) throw err;
+                let content = data.replace("%CONTENT%", html);
+
+                res.write(content);
+                res.end();
+              }
+            );
+          });
+        }
       });
     }
     // If request url is '/download'
@@ -60,10 +80,26 @@ http
       fs.readdir("./uploads", function (err, files) {
         if (err) throw err;
         files.forEach(function (file) {
-          html += `<li><a href="/uploads/${file}" download>${file}</a><br></li>`;
+          // Check if file is not a directory
+          if (!fs.statSync("./uploads/" + file).isDirectory()) {
+            html += `<li><a href="/uploads/${file}" download>${file}</a><br></li>`;
+          }
         });
       });
       html += `</ul>`;
+
+      // For each file in textareas folder, display textarea with value
+      fs.readdir("./uploads/textareas", function (err, files) {
+        if (err) throw err;
+        files.forEach(function (file) {
+          // Check if file is not a directory
+          if (!fs.statSync("./uploads/textareas/" + file).isDirectory()) {
+            html += `<textarea name="texttoupload" rows="10" cols="50">`;
+            html += fs.readFileSync("./uploads/textareas/" + file, "utf8");
+            html += `</textarea><br>`;
+          }
+        });
+      });
 
       // Read home.html file
       fs.readFile("./templates/download.html", "utf8", function (err, data) {
@@ -128,6 +164,7 @@ http
           `
           <form class="paste" action="fileupload" method="post" enctype="multipart/form-data">
           <div class='input'><input type="file" name="filetoupload"><div>
+          <textarea name="texttoupload" rows="10" cols="50"></textarea>
           <br>
           <input type="submit">
           </form>
