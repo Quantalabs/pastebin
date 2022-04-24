@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/quantum9innovation/pastebin#readme",
   "dependencies": {
+    "arg": "^5.0.1",
     "formidable": "^2.0.1",
-    "ip": "^1.1.5",
     "mime-types": "^2.1.35",
     "mv": "^2.1.1",
     "open": "^8.4.0",
