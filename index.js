@@ -155,7 +155,7 @@ http.createServer((req, res) => {
 
 			const bin = fields.bin
 			const filename = 'uploads/_bin.txt'
-			fs.appendFile(filename, bin, (err) => { if (err) throw err })
+			fs.writeFile(filename, bin, (err) => { if (err) throw err })
 
 			// Generate QR code
 			const fullURL = 'http://' + host + ':' + port + '/pasted'
@@ -163,8 +163,8 @@ http.createServer((req, res) => {
 			qr.toFile('./qrcode.png', fullURL)
 
 			const html = '<img src=\'/qrcode.png\'/><br>'
-					+ '<a href=\'/pasted/>'
-					+ `${shortURL}</a><br>`
+					+ '<a href=\'/pasted\'>'
+					+ 'View upload</a><br>'
 					+ '<p>Content pasted and ready!</p>'
 					+ '<a href=\'/\'>Back to home</a>'
 
