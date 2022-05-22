@@ -4,7 +4,9 @@
   "description": "Copy images, text, and entire directories to another device seamlessly and easily",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "npx eslint --fix .",
+    "format": "npx prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -32,7 +34,10 @@
     "qrcode": "^1.5.0"
   },
   "devDependencies": {
-    "eslint": "^8.12.0",
-    "pkg": "^5.5.2"
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "pkg": "^5.5.2",
+    "prettier": "2.6.2"
   }
 }
