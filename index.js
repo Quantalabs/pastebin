@@ -68,8 +68,8 @@ const verbosity = silent ? 2 : quiet ? 1 : 0;
 
 let wipe = !args["--no-wipe"];
 let auto = !args["--no-open"];
-if (wipe == null) wipe = true;
-if (auto == null) auto = true;
+if (wipe === null) wipe = true;
+if (auto === null) auto = true;
 
 // If uploads/ directory doesn't exist, create it
 // Otherwise, wipe the directory
@@ -141,7 +141,6 @@ http
 
         // Generate QR code
         const fullURL = "http://" + host + ":" + port + "/pasted";
-        const shortURL = host + ":" + port + "/pasted";
         qr.toFile("./qrcode.png", fullURL);
 
         const html =
