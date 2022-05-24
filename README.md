@@ -21,6 +21,6 @@ It is, simply put, the fastest, most modern, most reliable, and most extensible 
 4. Scan the QR code or open Pastebin on another computer
 5. Do <kbd>Ctrl</kbd>+<kbd>D</kbd> to download the file
 
-## Credits
+## Licensing and Credits Information
 
-This project is a more efficient and practical alternative to the original: [@Quantalabs/pastebin](https://github.com/Quantalabs/pastebin).
+This project uses the [GPL v3.0](https://choosealicense.com/licenses/gpl-3.0/) license.
