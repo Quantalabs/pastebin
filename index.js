@@ -1,11 +1,11 @@
 // Imports (native)
-const http = require("http");
+const http = require("http")
 const fs = require("fs");
+const path = require("path");
 
 // Imports (external)
 const formidable = require("formidable");
 const mime = require("mime-types");
-const path = require("path");
 const open = require("open");
 const arg = require("arg");
 const qr = require("qrcode");
