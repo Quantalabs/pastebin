@@ -26,7 +26,7 @@
           max-width: 800px;
           resize: none;
           white-space: nowrap;
-          overflow-y: hidden;
+          overflow-y: auto;
         }
 
         #copy {
@@ -39,13 +39,11 @@
           padding: 0px;
           padding-left: 5px;
           line-height: 50px;
-          text-align: center;
         }
 
         input {
           margin-left: auto;
           margin-right: auto;
-          text-align: center;
         }
 
         .icon {
@@ -82,9 +80,9 @@
       let textarea = document.createElement("textarea")
       textarea.value = text
       document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand("copy")
-      textarea.remove()
+      navigator.clipboard.writeText(textarea.value).then(function() {return;}, function(err) {
+          console.error('Could not copy text: ', err);
+      });
     
     }
 

@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/Quantalabs/pastebin/issues"
   },
-  "homepage": "https://github.com/quantum9innovation/pastebin#readme",
+  "homepage": "https://github.com/Quantalabs/pastebin#readme",
   "dependencies": {
     "arg": "^5.0.1",
     "formidable": "^2.0.1",
