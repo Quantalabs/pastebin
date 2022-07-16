@@ -1,108 +1,180 @@
-var http = require("http");
-var formidable = require("formidable");
-const url = require("url");
+// Imports (native)
+const http = require("http")
 const fs = require("fs");
 const path = require("path");
-const qr = require("qrcode");
-var ip = require("ip");
+
+// Imports (external)
+const formidable = require("formidable");
+const mime = require("mime-types");
 const open = require("open");
+const arg = require("arg");
+const qr = require("qrcode");
+const mv = require("mv");
 
-const port = process.argv[2] || 8080;
-const host = process.argv[3] || ip.address();
+// Helper funcs
+const say = (msg, v = 1) => {
+  if (v >= verbosity) console.log(msg);
+};
+const bool = () => true;
+const ip = () => {
+  const { networkInterfaces } = require("os");
 
-// If uploads/ dir doesn't exist, create it
-if (!fs.existsSync("./uploads")) {
-  fs.mkdirSync("./uploads");
-  fs.mkdirSync("./uploads/textareas");
+  const networks = networkInterfaces();
+  const res = {};
+
+  for (const name of Object.keys(networks)) {
+    for (const net of networks[name]) {
+      // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+      if (net.family == 4 && !net.internal) {
+        if (!res[name]) res[name] = [];
+        res[name].push(net.address);
+      }
+    }
+  }
+
+  let best = null;
+  for (const name of Object.keys(res)) best = best || res[name];
+
+  return best;
+};
+
+// Constants (args)
+const args = arg({
+  // long
+  "--host": String,
+  "--port": Number,
+  "--quiet": arg.flag(bool),
+  "--silent": arg.flag(bool),
+  "--no-wipe": arg.flag(bool),
+  "--no-open": arg.flag(bool),
+
+  // short
+  "-p": "--port",
+  "-h": "--host",
+  "-q": "--quiet",
+  "-s": "--silent",
+  "-w": "--no-wipe",
+  "-o": "--no-open"
+});
+
+while (args._.length < 2) args._.push(null);
+
+const host = args["--host"] || args._[0] || ip() || "localhost";
+const port = args["--port"] || args._[1] || 8080;
+
+const quiet = args["--quiet"] || false;
+const silent = args["--silent"] || false;
+const verbosity = silent ? 2 : quiet ? 1 : 0;
+
+let wipe = !args["--no-wipe"];
+let auto = !args["--no-open"];
+if (wipe === null) wipe = true;
+if (auto === null) auto = true;
+
+// If uploads/ directory doesn't exist, create it
+// Otherwise, wipe the directory
+if (!fs.existsSync("./uploads")) fs.mkdirSync("./uploads");
+else if (wipe) {
+  say("For security reasons, wiping uploads/ directory...");
+  fs.readdirSync("./uploads").forEach(file =>
+    fs.unlinkSync(`./uploads/${file}`)
+  );
 }
 
+// Start the server
 http
-  .createServer(function (req, res) {
-    console.log(`${req.method} ${req.url}`);
+  .createServer((req, res) => {
+    say(`${req.method} ${req.url}`, 0);
 
-    // If request url is not '/', then host the file
+    // If request url is not '/',
+    // host the file
     if (req.url == "/fileupload") {
-      var form = new formidable.IncomingForm();
-      form.parse(req, function (err, fields, files) {
-        // If textarea is not empty
-        if (fields.texttoupload != "") {
-          // Create a file with the textarea content
-          fs.writeFileSync(
-            `./uploads/textareas/textarea.txt`,
-            fields.texttoupload,
-            { flag: "w+" }
-          );
+      const form = new formidable.IncomingForm();
+      form.parse(req, (_err, _fields, files) => {
+        const oldpath = files.filetoupload.filepath;
+        const newpath = "./uploads/" + files.filetoupload.originalFilename;
+        mv(oldpath, newpath, err => {
+          if (err) throw err;
 
-          // Redirect to the downloads page
-          res.writeHead(302, {
-            Location: `http://${host}:${port}/download`,
-          });
-          res.end();
-        } else {
-          var oldpath = files.filetoupload.filepath;
-          var newpath = "./uploads/" + files.filetoupload.originalFilename;
-          fs.rename(oldpath, newpath, function (err) {
+          // Generate QR code
+          const fullURL =
+            "http://" +
+            host +
+            ":" +
+            port +
+            "/uploads/" +
+            files.filetoupload.originalFilename;
+          const shortURL =
+            host +
+            ":" +
+            port +
+            "/uploads/" +
+            files.filetoupload.originalFilename;
+          qr.toFile("./qrcode.png", fullURL);
+
+          const html =
+            "<img src='/qrcode.png'/><br>" +
+            "<a href='/uploads/" +
+            `${files.filetoupload.originalFilename}'>` +
+            `${shortURL}</a><br>` +
+            "<p>File uploaded and moved!</p>" +
+            "<a href='/'>Back to home</a>";
+
+          // Read upload.html
+          fs.readFile("./templates/upload.html", "utf8", (err, data) => {
             if (err) throw err;
+            const content = data.replace("%CONTENT%", html);
 
-            // Generate QR code
-            qr.toFile(
-              "./qrcode.png",
-              "http://" +
-                host +
-                ":" +
-                port +
-                "/uploads/" +
-                files.filetoupload.originalFilename
-            );
-
-            let html = `<img src='qrcode.png'/><br><p>File uploaded and moved!</p><a href='/'>Back to home</a>`;
-            // Read upload.html
-            fs.readFile(
-              "./templates/upload.html",
-              "utf8",
-              function (err, data) {
-                if (err) throw err;
-                let content = data.replace("%CONTENT%", html);
-
-                res.write(content);
-                res.end();
-              }
-            );
+            res.write(content);
+            res.end();
           });
-        }
-      });
-    }
-    // If request url is '/download'
-    else if (req.url == "/download") {
-      // Display links to download files
-
-      let html = `<ul>`;
-      fs.readdir("./uploads", function (err, files) {
-        if (err) throw err;
-        files.forEach(function (file) {
-          // Check if file is not a directory
-          if (!fs.statSync("./uploads/" + file).isDirectory()) {
-            html += `<li><a href="/uploads/${file}" download>${file}</a><br></li>`;
-          }
         });
       });
-      html += `</ul>`;
+    } else if (req.url == "/paste") {
+      const form = new formidable.IncomingForm();
+      form.parse(req, (_err, fields, _files) => {
+        const bin = fields.bin;
+        const filename = "uploads/_bin.txt";
+        fs.writeFile(filename, bin, err => {
+          if (err) throw err;
+        });
 
-      // For each file in textareas folder, display textarea with value
-      fs.readdir("./uploads/textareas", function (err, files) {
-        if (err) throw err;
-        files.forEach(function (file) {
-          // Check if file is not a directory
-          if (!fs.statSync("./uploads/textareas/" + file).isDirectory()) {
-            html += `<textarea name="texttoupload" rows="10" cols="50">`;
-            html += fs.readFileSync("./uploads/textareas/" + file, "utf8");
-            html += `</textarea><br>`;
-          }
+        // Generate QR code
+        const fullURL = "http://" + host + ":" + port + "/pasted";
+        qr.toFile("./qrcode.png", fullURL);
+
+        const html =
+          "<img src='/qrcode.png'/><br>" +
+          "<a href='/pasted'>" +
+          "View upload</a><br>" +
+          "<p>Content pasted and ready!</p>" +
+          "<a href='/'>Back to home</a>";
+
+        // Read upload.html
+        fs.readFile("./templates/upload.html", "utf8", (err, data) => {
+          if (err) throw err;
+          const content = data.replace("%CONTENT%", html);
+
+          res.write(content);
+          res.end();
         });
       });
+    } else if (req.url == "/download") {
+      // If request url is '/download',
+      // display links to download files
 
-      // Read home.html file
-      fs.readFile("./templates/download.html", "utf8", function (err, data) {
+      let html = "<ul>";
+      fs.readdir("./uploads", (err, files) => {
+        if (err) throw err;
+        files.forEach(file => {
+          html +=
+            `<li><a href="/uploads/${file}" download>${file}` + "</a><br></li>";
+        });
+      });
+      html += "</ul>";
+
+      // Read download.html file
+      fs.readFile("./templates/download.html", "utf8", (err, data) => {
         if (err) throw err;
         let content = data;
 
@@ -110,65 +182,91 @@ http
         res.write(content);
         res.end();
       });
-    } else if (req.url !== "/") {
+    } else if (req.url == "/pasted") {
+      // If request url is '/pasted',
+      // display the pasted content
+
+      let html = "";
+      fs.readFile("./uploads/_bin.txt", "utf8", (err, data) => {
+        if (err) throw err;
+        html += data;
+      });
+
+      // Read pasted.html file
+      fs.readFile("./templates/pasted.html", "utf8", (err, data) => {
+        if (err) throw err;
+        let content = data;
+
+        content = content.replace("%CONTENT%", html);
+        res.write(content);
+        res.end();
+      });
+    } else if (req.url != "/") {
       // parse URL
-      const parsedUrl = url.parse(req.url);
+      const parsedURL = new URL(req.url, "http://" + host + ":" + port);
+
       // extract URL path
-      let pathname = `.${parsedUrl.pathname}`;
-      // based on the URL path, extract the file extension. e.g. .js, .doc, ...
-      const ext = path.parse(pathname).ext;
-      // maps file extension to MIME typere
-      const map = {
-        ".ico": "image/x-icon",
-        ".html": "text/html",
-        ".js": "text/javascript",
-        ".json": "application/json",
-        ".css": "text/css",
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".wav": "audio/wav",
-        ".mp3": "audio/mpeg",
-        ".svg": "image/svg+xml",
-        ".pdf": "application/pdf",
-        ".doc": "application/msword",
-      };
+      const pathName = `.${parsedURL.pathname}`;
 
-      fs.exists(pathname, function (exist) {
-        if (!exist) {
-          // if the file is not found, return 404
-          res.statusCode = 404;
-          res.end(`File ${pathname} not found!`);
-          return;
-        }
+      // based on the URL path, extract the file extension.
+      // e.g. .js, .doc, ...
+      const ext = path.parse(pathName).ext;
 
+      if (fs.existsSync(pathName)) {
         // Read file from system and prompt user to download the file
-        fs.readFile(pathname, function (err, data) {
+        fs.readFile(pathName, (err, data) => {
           if (err) {
             res.statusCode = 500;
-            res.end(`Error getting the file: ${err}.`);
+            res.end(
+              `Error retrieving the file: ${err}.` +
+                `(Error: ${res.statusCode})`
+            );
           } else {
-            // if the file is found, set Content-type and send data
-            res.setHeader("Content-type", map[ext] || "text/plain");
+            // If the file is found,
+            // set Content-type and send data
+            res.setHeader("Content-type", mime.lookup(ext) || "text/plain");
             res.end(data);
           }
         });
-      });
+      } else {
+        // if the file is not found, return 404
+        res.statusCode = 404;
+        res.end(`File ${pathName} not found! ` + `(Error: ${res.statusCode})`);
+      }
     } else {
       res.writeHead(200, { "Content-Type": "text/html" });
 
       // Read template.html file synchronously
-      fs.readFile("./templates/home.html", "utf8", function (err, data) {
+      fs.readFile("./templates/home.html", "utf8", (err, data) => {
         if (err) throw err;
-        let content = data.replace(
+        const content = data.replace(
           "%CONTENT%",
+
           `
-          <form class="paste" action="fileupload" method="post" enctype="multipart/form-data">
-          <div class='input'><input type="file" name="filetoupload"><div>
-          <textarea name="texttoupload" rows="10" cols="50"></textarea>
-          <br>
-          <input type="submit">
-          </form>
-          `
+				<form class="paste" action="paste" method="post" >
+					<textarea id="bin" name="bin" 
+					placeholder="Paste here with Ctrl+V">
+					</textarea>
+					<input id="go" type="submit" value="Go">
+				</form>
+				<br><br>
+				<p id="sep">
+					or
+				</p>
+				<div>
+					<form class="file" action="fileupload" method="post" 
+					enctype="multipart/form-data">
+						<div class="input">
+							<input id="file" type="file" name="filetoupload">
+						</div>
+						<span id="label" onclick="showInfo()">
+							Click to upload
+						</span>
+						<br>
+						<input type="submit">
+					</form>
+				</div>
+				`
         );
         res.write(content);
         res.end();
@@ -177,7 +275,11 @@ http
   })
   .listen(parseInt(port), host);
 
-console.log(`Server listening on port http://${host}:${port}`);
+say(`Server listening on port http://${host}:${port}`);
+if (auto) open(`http://${host}:${port}`);
 
-// Open link
-open(`http://${host}:${port}`);
+// End the server
+process.on("SIGINT", () => {
+  say("\nCaught interrupt signal; aborting...", 0);
+  process.exit();
+});

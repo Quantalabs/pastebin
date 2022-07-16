@@ -1,37 +1,26 @@
+# Pastebin
 
-# Pastebin 
-The best way to send files, links, and more from one device to another.
+Pastebin is a tool that allows seamless connections between different devices.
+It is, simply put, the fastest, most modern, most reliable, and most extensible 21st-century alternative to emailing yourself.
 
+## Here's how it works:
 
-## Installation
+### Text/URLs
 
-Install pastebin from the [releases page](https://github.com/Quantalabs/pastebin/releases), and download the latest zip file for your operating system. 
+1. Copy text or URLs to clipboard
+2. Open up Pastebin and paste them into the text box
+3. Click the "Go" button
+4. Scan the QR code or open Pastebin on another computer
+5. Click the "Copy" button
 
-Installation is also avaliable through git:
+### Files/Directories
 
-```bash
-git clone https://github.com/Quantalabs/pastebin # or gh repo clone Quantalabs/pastebin
-npm install
-node . # Starts pastebin
-```
+1. Open up Pastebin
+2. Drag and drop files or directories into the upload box
+3. Click the "Submit" button
+4. Scan the QR code or open Pastebin on another computer
+5. Do <kbd>Ctrl</kbd>+<kbd>D</kbd> to download the file
 
-If updating to a new release, simply download the executable file for your operating system and replace the old executable with the new one. This will work with minor releases only, do not do this with a major release.
-
-Alternatively, if you are on linux, you can download the [install script](https://github.com/Quantalabs/pastebin/blob/master/scripts/install.sh), run it, and then extract the zip file downloaded, and add the directory to path.
-## Usage
-
-To create a server, run the following:
-```sh
-pastebin [PORT] [HOST]
-```
-The port and host are optional. The port defaults to 8080, and the host defaults to your network ip (so you can access the server from another computer.)
-
-## License
+## Licensing and Credits Information
 
 This project uses the [GPL v3.0](https://choosealicense.com/licenses/gpl-3.0/) license.
-
-## Screenshots
-
-![demo](https://user-images.githubusercontent.com/55121845/161403526-aac0e5c2-1647-41cf-b0cb-5edd0b14a2fa.png)
-![demo](https://user-images.githubusercontent.com/55121845/161403537-34f385ab-3559-48f8-a394-c589d9d8bdf6.png)
-![demo](https://user-images.githubusercontent.com/55121845/161403546-bfff5e7a-ec02-4d62-bf83-b7034667a94f.png)
