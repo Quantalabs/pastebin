@@ -22,7 +22,7 @@
   "author": "Quantalabs (@QLabs)",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/quantum9innovation/pastebin/issues"
+    "url": "https://github.com/Quantalabs/pastebin/issues"
   },
   "homepage": "https://github.com/quantum9innovation/pastebin#readme",
   "dependencies": {
