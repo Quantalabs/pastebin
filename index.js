@@ -1,5 +1,5 @@
 // Imports (native)
-const http = require("http")
+const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
@@ -59,8 +59,13 @@ const args = arg({
 
 while (args._.length < 2) args._.push(null);
 
-const host = args["--host"] || args._[0] || ip() || "localhost";
-const port = args["--port"] || args._[1] || 8080;
+const host =
+  process.env.PASTEBIN_HOST ||
+  args["--host"] ||
+  args._[0] ||
+  ip() ||
+  "localhost";
+const port = process.env.PASTEBIN_PORT || args["--port"] || args._[1] || 8080;
 
 const quiet = args["--quiet"] || false;
 const silent = args["--silent"] || false;
