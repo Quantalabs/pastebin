@@ -65,7 +65,10 @@ const host =
   args._[0] ||
   ip() ||
   "localhost";
-const port = process.env.PASTEBIN_PORT || args["--port"] || args._[1] || 8080;
+const port = process.env.PASTEBIN_PORT || 
+  args["--port"] ||
+  args._[1] || 
+  8080;
 
 const quiet = args["--quiet"] || false;
 const silent = args["--silent"] || false;
