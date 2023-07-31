@@ -3,6 +3,15 @@
 Pastebin is a tool that allows seamless connections between different devices.
 It is, simply put, the fastest, most modern, most reliable, and most extensible 21st-century alternative to emailing yourself.
 
+If Pastebin is unable to detect your IP address for local hosting, or you would like it to host on a particular URL each time, you can specify these parameters as the following environment variables:
+
+```sh
+export PASTEBIN_HOST='localhost'
+export PASTEBIN_PORT='8080'
+```
+
+Above are the default values; change them to match your needs.
+
 ## Here's how it works:
 
 ### Text/URLs
